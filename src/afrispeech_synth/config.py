@@ -58,6 +58,8 @@ class TTSConfig:
     max_retries: int = 5
     sample_rate: int = 24000
     api_key_env: str = "GEMINI_API_KEY"
+    api_keys_env: str = "GEMINI_API_KEYS"
+    scale_concurrency_with_keys: bool = True
 
     # --- gemini-live backend only -----------------------------------------
     # The Live models are conversational: without an instruction pinning them

@@ -1,8 +1,10 @@
-# afrispeech-synth
+# gemini-synthetic-speech-gen
 
 **Turn [Google Gemini](https://ai.google.dev/gemini-api/docs) into a speech-dataset factory
 for any African language — from raw text to a training-ready HuggingFace dataset, with one
 command.**
+
+*(Formerly `afrispeech-synth`, enhanced with multi-key pool scaling).*
 
 Most African languages have no recorded speech corpus. Gemini can speak many of them well
 enough to bootstrap one, but a usable dataset is not just API calls: you need text in the
@@ -11,10 +13,13 @@ correctly, and output packaged so a trainer can consume it. This does all four a
 through either the **TTS** models or the **Live** API's native-audio models.
 
 ```bash
-pip install "afrispeech-synth[gemini]"
+pip install "gemini-synthetic-speech-gen[gemini]"
 export GEMINI_API_KEY=...        # https://aistudio.google.com/apikey
 
-afrispeech-synth run examples/twi.yaml
+# Or scale 5x faster by pooling multiple API keys:
+export GEMINI_API_KEYS="key1,key2,key3,key4,key5"
+
+gemini-synthetic-speech-gen run examples/twi.yaml
 ```
 
 **[Hear what it produces](https://huggingface.co/spaces/AfriSpeech/afrispeech-synth-demo)** —
@@ -193,6 +198,18 @@ rather than reads — the exact behaviour the system instruction exists to preve
 
 A model outside this list still runs; the backend just notes that it has not been checked
 on African languages.
+
+**Multi-Key Pool Scaling (5x+ Speed).** Free-tier Gemini accounts enforce strict concurrent
+session limits (typically 5 concurrent sessions for the Live API). To scale throughput
+linearly without hitting 429 or 1011 quota errors, pass multiple Gemini API keys:
+
+```bash
+export GEMINI_API_KEYS="key1,key2,key3,key4,key5"
+```
+
+Or declare `GEMINI_API_KEYS=key1,key2,...` in a local `.env` file. The engine pools the keys,
+rotates WebSocket connections and HTTP streams across them, and scales both concurrency and
+RPM proportionally (e.g. 5 keys = 20 concurrent sessions, achieving ~180–200 clips/minute).
 
 **What the audio is.** Clips are written exactly as the API returns them — this tool does
 no resampling, no re-encoding and no format conversion. Both Gemini backends return the

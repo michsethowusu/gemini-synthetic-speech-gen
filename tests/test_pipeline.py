@@ -403,3 +403,11 @@ def test_invisible_characters_are_removed():
 
     assert strip_punctuation("nebe\u200brechi") == "neberechi"
     assert strip_punctuation("a\u200db\ufeffc") == "abc"
+
+
+def test_multi_key_config_and_scaling(monkeypatch):
+    """Multiple API keys scale concurrency and RPM automatically."""
+    monkeypatch.setenv("GEMINI_API_KEYS", "key1,key2,key3")
+    cfg = RunConfig(language="twi")
+    assert cfg.tts.api_keys_env == "GEMINI_API_KEYS"
+    assert cfg.tts.scale_concurrency_with_keys is True

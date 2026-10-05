@@ -3,13 +3,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "afrispeech-synth"
-version = "0.1.0"
-description = "Build synthetic speech datasets for African languages with Google Gemini TTS: corpus text, phoneme-coverage sentence selection, africa-g2p orthography normalisation, and a training-ready HuggingFace dataset."
+name = "gemini-synthetic-speech-gen"
+version = "0.2.0"
+description = "Turn Google Gemini into a speech-dataset factory for African languages with multi-key pool scaling: corpus text, phoneme-coverage sentence selection, africa-g2p orthography normalisation, and a training-ready HuggingFace dataset."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
-authors = [{ name = "AfriSpeech" }]
+authors = [{ name = "Mich-Seth Owusu" }]
 keywords = ["tts", "gemini", "speech-synthesis", "african-languages", "dataset", "asr", "g2p"]
 
 dependencies = [
@@ -33,11 +33,12 @@ hf = ["datasets>=2.14"]
 dev = ["pytest>=7.0"]
 
 [project.scripts]
+gemini-synthetic-speech-gen = "afrispeech_synth.cli:main"
 afrispeech-synth = "afrispeech_synth.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/AfriSpeech/afrispeech-synth"
-Issues = "https://github.com/AfriSpeech/afrispeech-synth/issues"
+Homepage = "https://github.com/michsethowusu/gemini-synthetic-speech-gen"
+Issues = "https://github.com/michsethowusu/gemini-synthetic-speech-gen/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/afrispeech_synth"]

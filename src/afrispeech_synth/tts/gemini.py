@@ -32,18 +32,29 @@ class GeminiTTS(TTSBackend):
 
         from ..env import load as load_env
 
-        api_key = os.environ.get(config.api_key_env)
-        if not api_key:
+        keys_env = getattr(config, "api_keys_env", "GEMINI_API_KEYS")
+        key_env = getattr(config, "api_key_env", "GEMINI_API_KEY")
+        raw_keys = os.environ.get(keys_env) or os.environ.get(key_env)
+        if not raw_keys:
             load_env()
-            api_key = os.environ.get(config.api_key_env)
-        if not api_key:
+            raw_keys = os.environ.get(keys_env) or os.environ.get(key_env)
+        if not raw_keys:
             raise TTSError(
                 f"No API key found. Either:\n"
-                f"    export {config.api_key_env}=...\n"
-                f"or put `{config.api_key_env}=...` in a .env file in this directory.\n"
+                f"    export {key_env}=...\n"
+                f"or export {keys_env}=key1,key2,key3 (for multi-key pooling)\n"
+                f"or put `{key_env}=...` in a .env file in this directory.\n"
                 f"Keys must never go in a config file — those get committed."
             )
-        self._client = genai.Client(api_key=api_key)
+        self._keys = [k.strip() for k in raw_keys.split(",") if k.strip()]
+        self._clients = [genai.Client(api_key=k) for k in self._keys]
+        self._client = self._clients[0]
+        self._client_idx = 0
+        self.num_keys = len(self._clients)
+
+    def describe(self) -> str:
+        key_info = f", {self.num_keys} API keys in pool" if self.num_keys > 1 else ""
+        return f"{self.name} ({self.config.model}{key_info})"
 
     def _request_config(self, voice: str):
         types = self._types
@@ -63,8 +74,10 @@ class GeminiTTS(TTSBackend):
 
         audio = bytearray()
         mime_type = ""
+        client = self._clients[self._client_idx % len(self._clients)]
+        self._client_idx += 1
         try:
-            stream = await self._client.aio.models.generate_content_stream(
+            stream = await client.aio.models.generate_content_stream(
                 model=self.config.model,
                 contents=contents,
                 config=self._request_config(voice),

@@ -191,11 +191,18 @@ async def synthesise_async(utterances: Sequence[Utterance], config, language: La
         return {"done": 0, "failed": 0, "skipped": skipped, "workspace": workspace}
 
     backend = tts_registry.get_backend(config.backend, config, language)
-    print(f"  backend: {backend.describe()}, voice={config.voice}, "
-          f"concurrency={config.concurrency}, rpm={config.rpm}", flush=True)
+    num_keys = getattr(backend, "num_keys", 1)
+    concurrency = config.concurrency
+    rpm = config.rpm
+    if num_keys > 1 and getattr(config, "scale_concurrency_with_keys", True):
+        concurrency = config.concurrency * num_keys
+        rpm = config.rpm * num_keys
 
-    limiter = RateLimiter(config.rpm)
-    semaphore = asyncio.Semaphore(config.concurrency)
+    print(f"  backend: {backend.describe()}, voice={config.voice}, "
+          f"concurrency={concurrency}, rpm={rpm}", flush=True)
+
+    limiter = RateLimiter(rpm)
+    semaphore = asyncio.Semaphore(concurrency)
     counters = {"done": 0, "failed": 0, "total": len(pending), "started": time.time()}
     try:
         await asyncio.gather(*[

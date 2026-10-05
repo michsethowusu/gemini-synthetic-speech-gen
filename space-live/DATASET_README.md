@@ -26,7 +26,7 @@ Generated with [afrispeech-synth](https://github.com/AfriSpeech/afrispeech-synth
 universal orthography with [africa-g2p](https://github.com/AfriSpeech/africa-g2p), spoken by
 Google Gemini's Live API.
 
-- **17,010 clips** · **38.7 hours** · **566 languages** · **30 voices**
+- **17,010 clips** · **38.8 hours** · **566 languages** · **30 voices**
 - Every clip is a **distinct sentence** — no sentence is repeated
 - Each language is read by up to 30 different voices, one sentence per voice
 - ~1.29 hours per voice
